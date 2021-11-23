@@ -1,7 +1,10 @@
 const { Contact } = require('./Schemas/contact')
 // =======================================list============================
-async function listContacts() {
-  const result = await Contact.find({})
+const listContacts = async (userId, page = '1', limit = '15') => {
+  const result = await Contact.find({ owner: userId },
+    '_id name email phone favorite',
+    { page, limit })
+    .populate('owner', '_id email')
   return result
 }
 
