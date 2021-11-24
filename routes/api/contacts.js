@@ -1,7 +1,7 @@
 const express = require('express')
 const { NotFound, BadRequest } = require('http-errors')
 const { joiSchema, joiSchemaUpdate } = require('../../model/Schemas/contact')
-const { authenticate } = require('../../middelevwares')
+const { authenticate } = require('../../middlewares')
 
 const {
   listContacts,
@@ -60,7 +60,7 @@ router.post('/', authenticate, async (req, res, next) => {
   try {
     const userId = req.user._id
     const newContact = { ...req.body, owner: userId }
-    const { error } = joiSchema.validate(req.body)
+    const { error } = await joiSchema.validate(req.body)
 
     if (error) {
       throw new BadRequest('Missing required name field')

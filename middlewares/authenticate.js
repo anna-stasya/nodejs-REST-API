@@ -2,7 +2,7 @@ const { Unauthorized, NotFound } = require('http-errors')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-const { User } = require('../model/Schemas/contact')
+const { User } = require('../model/Schemas/user')
 const { SECRET_KEY } = process.env
 
 const authenticate = async (req, res, next) => {
@@ -18,8 +18,9 @@ const authenticate = async (req, res, next) => {
     }
 
     try {
-      const { _id } = jwt.verify(token, SECRET_KEY)
-      const user = await User.findById(_id)
+      const { id } = jwt.verify(token, SECRET_KEY)
+      const user = await User.findById(id)
+
       if (!user) {
         throw new NotFound('User not found')
       }
@@ -27,6 +28,7 @@ const authenticate = async (req, res, next) => {
       if (!user.token) {
         throw new Unauthorized('Not authorized')
       }
+
       req.user = user
       next()
     } catch (error) {
