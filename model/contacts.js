@@ -10,7 +10,7 @@ const listContacts = async (userId, page = '1', limit = '15') => {
 
 // =====================================get================================
 const getContactsById = async (contactId, userId) => {
-  const result = await Contact.findById(contactId, userId)
+  const result = await Contact.findOne({ _id: contactId, owner: userId })
   if (!result) {
     return null
   }
@@ -25,7 +25,7 @@ const addContact = async (body) => {
 
 // =====================================update by id================================
 const updateContactById = async (contactId, body, userId) => {
-  const result = await Contact.findByIdAndUpdate(
+  const result = await Contact.findOneAndUpdate(
     { _id: contactId, owner: userId },
     { ...body },
     { new: true },
@@ -35,7 +35,7 @@ const updateContactById = async (contactId, body, userId) => {
 
 // =====================================remove================================
 const removeContact = async (contactId, userId) => {
-  const result = await Contact.findByIdAndRemove({ _id: contactId, owner: userId })
+  const result = await Contact.findOneAndRemove({ _id: contactId, owner: userId })
   if (result === -1) {
     return null
   }
@@ -44,7 +44,7 @@ const removeContact = async (contactId, userId) => {
 
 // =====================================favorite================================
 const updateStatusContact = async (contactId, body, userId) => {
-  const result = await Contact.findByIdAndUpdate(
+  const result = await Contact.findOneAndUpdate(
     { _id: contactId, owner: userId },
     { ...body },
     { new: true }

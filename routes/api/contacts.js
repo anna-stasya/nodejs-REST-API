@@ -80,10 +80,11 @@ router.post('/', authenticate, async (req, res, next) => {
 })
 
 // ------------------------DELETE removeContact-----------------
-router.delete('/:contactId', async (req, res, next) => {
+router.delete('/:contactId', authenticate, async (req, res, next) => {
   try {
     const { contactId } = req.params
     const userId = req.user._id
+
     const result = await removeContact(contactId, userId)
     if (!result) {
       throw new NotFound(`Contacts whith id=${contactId} not found`)
