@@ -17,7 +17,8 @@ const userSchema = Schema({
   subscription: {
     type: String,
     enum: ['starter', 'pro', 'business'],
-    default: 'starter'
+    default: 'starter',
+    required: true
   },
   token: {
     type: String,
@@ -39,7 +40,7 @@ userSchema.methods.comparePassword = function (password) {
 const joiSchema = Joi.object({
   password: Joi.string().required(),
   email: Joi.string().email().required(),
-  subscription: Joi.string(),
+  subscription: Joi.string().case('lower').valid('starter', 'pro', 'business'),
   token: Joi.string(),
 })
 
