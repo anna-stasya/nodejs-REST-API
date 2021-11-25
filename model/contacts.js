@@ -9,8 +9,8 @@ const listContacts = async (userId, page = '1', limit = '15') => {
 }
 
 // =====================================get================================
-const getContactsById = async (contactId) => {
-  const result = await Contact.findById(contactId)
+const getContactsById = async (contactId, userId) => {
+  const result = await Contact.findById(contactId, userId)
   if (!result) {
     return null
   }
@@ -24,18 +24,18 @@ const addContact = async (body) => {
 }
 
 // =====================================update by id================================
-const updateContactById = async (contactId, body) => {
+const updateContactById = async (contactId, body, userId) => {
   const result = await Contact.findByIdAndUpdate(
-    { _id: contactId },
+    { _id: contactId, owner: userId },
     { ...body },
-    { new: true }
+    { new: true },
   )
   return result
 }
 
 // =====================================remove================================
-const removeContact = async (contactId) => {
-  const result = await Contact.findByIdAndRemove({ _id: contactId })
+const removeContact = async (contactId, userId) => {
+  const result = await Contact.findByIdAndRemove({ _id: contactId, owner: userId })
   if (result === -1) {
     return null
   }
