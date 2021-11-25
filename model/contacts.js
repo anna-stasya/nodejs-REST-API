@@ -43,9 +43,9 @@ const removeContact = async (contactId, userId) => {
 }
 
 // =====================================favorite================================
-const updateStatusContact = async (contactId, body) => {
+const updateStatusContact = async (contactId, body, userId) => {
   const result = await Contact.findByIdAndUpdate(
-    { _id: contactId },
+    { _id: contactId, owner: userId },
     { ...body },
     { new: true }
   )
