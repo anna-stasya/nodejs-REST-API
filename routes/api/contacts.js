@@ -1,5 +1,7 @@
 const express = require('express')
+const { NotFound, BadRequest } = require('http-errors')
 const { joiSchema, joiSchemaUpdate } = require('../../model/Schemas/contact')
+const { authenticate } = require('../../middlewares')
 
 const {
   listContacts,
@@ -8,14 +10,16 @@ const {
   addContact,
   updateContactById,
   updateStatusContact,
-} = require('../../model/index')
+} = require('../../model/contacts')
 
 const router = express.Router()
 
 // ----------------------GET listContacts-----------------------
-router.get('/', async (req, res, next) => {
+router.get('/', authenticate, async (req, res, next) => {
   try {
-    const contacts = await listContacts()
+    const userId = req.user._id
+    const contacts = await listContacts(userId, req.query)
+
     res.json({
       status: 'success',
       code: 200,
@@ -24,23 +28,19 @@ router.get('/', async (req, res, next) => {
         contacts
       },
     })
-  } catch (err) {
-    next(err)
+  } catch (error) {
+    next(error)
   }
 })
 
 // ---------------------- GET getContactById---------------
-router.get('/:contactId', async (req, res, next) => {
+router.get('/:contactId', authenticate, async (req, res, next) => {
   try {
     const { contactId } = req.params
-    const result = await getContactsById(contactId)
+    const userId = req.user._id
+    const result = await getContactsById(contactId, userId)
     if (!result) {
-      res.status(404).json({
-        status: 'error',
-        code: 404,
-        message: 'Contacts not found'
-      })
-      return
+      throw new NotFound('Contacts not found')
     }
     res.json({
       status: 'success',
@@ -56,19 +56,16 @@ router.get('/:contactId', async (req, res, next) => {
 })
 
 // ------------------------POST addContact----------------------
-router.post('/', async (req, res, next) => {
+router.post('/', authenticate, async (req, res, next) => {
   try {
-    const { error } = joiSchema.validate(req.body)
+    const userId = req.user._id
+    const newContact = { ...req.body, owner: userId }
+    const { error } = await joiSchema.validate(req.body)
 
     if (error) {
-      res.status(400).json({
-        status: 'error',
-        code: 400,
-        message: 'Missing required name field'
-      })
-      return
+      throw new BadRequest('Missing required name field')
     }
-    const result = await addContact(req.body)
+    const result = await addContact(newContact)
     res.status(201).json({
       status: 'success',
       code: 201,
@@ -83,17 +80,14 @@ router.post('/', async (req, res, next) => {
 })
 
 // ------------------------DELETE removeContact-----------------
-router.delete('/:contactId', async (req, res, next) => {
+router.delete('/:contactId', authenticate, async (req, res, next) => {
   try {
     const { contactId } = req.params
-    const result = await removeContact(contactId)
+    const userId = req.user._id
+
+    const result = await removeContact(contactId, userId)
     if (!result) {
-      res.status(404).json({
-        status: 'error',
-        code: 404,
-        message: `Contacts whith id=${contactId} not found`
-      })
-      return
+      throw new NotFound(`Contacts whith id=${contactId} not found`)
     }
     res.json({
       status: 'success',
@@ -106,26 +100,17 @@ router.delete('/:contactId', async (req, res, next) => {
 })
 
 // ------------------------PUT updateContactById-------------------
-router.put('/:contactId', async (req, res, next) => {
+router.put('/:contactId', authenticate, async (req, res, next) => {
   try {
     const { error } = joiSchemaUpdate.validate(req.body)
     if (error) {
-      res.status(400).json({
-        status: 'error',
-        code: 400,
-        message: 'Missing field favorite'
-      })
-      return
+      throw new BadRequest('Missing field favorite')
     }
     const { contactId } = req.params
-    const result = await updateContactById(contactId, req.body)
+    const userId = req.user._id
+    const result = await updateContactById(contactId, req.body, userId)
     if (!result) {
-      res.status(404).json({
-        status: 'error',
-        code: 404,
-        message: 'Not found'
-      })
-      return
+      throw new NotFound('Not found')
     }
     res.json({
       status: 'success',
@@ -141,28 +126,19 @@ router.put('/:contactId', async (req, res, next) => {
 })
 
 // ------------------------PATCH favorite-------------------
-router.patch('/:contactId/favorite', async (req, res, next) => {
+router.patch('/:contactId/favorite', authenticate, async (req, res, next) => {
   try {
     const { error } = joiSchema.validate(req.body)
     if (!error) {
-      res.status(400).json({
-        status: 'error',
-        code: 400,
-        message: 'Missing field favorite'
-      })
-      return
+      throw new BadRequest('Missing field favorite')
     }
     const { contactId } = req.params
     const { favorite } = req.body
-    const result = await updateStatusContact(contactId, { favorite })
+    const userId = req.user._id
+    const result = await updateStatusContact(contactId, { favorite }, userId)
 
     if (!result) {
-      res.status(404).json({
-        status: 'error',
-        code: 404,
-        message: 'Contact not found'
-      })
-      return
+      throw new NotFound('Contact not found')
     }
     res.json({
       status: 'success',
