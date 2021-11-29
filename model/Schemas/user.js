@@ -24,6 +24,9 @@ const userSchema = Schema({
     type: String,
     default: null,
   },
+  image: {
+    avatarURL: String,
+  }
 }, { versionKey: false, timestamps: true })
 
 // ---------------------hash---------------------
