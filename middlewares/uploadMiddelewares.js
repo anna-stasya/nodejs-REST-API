@@ -9,14 +9,12 @@ const uploadConfig = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname)
-  },
-  limits: {
-    fileSize: 2048
   }
 })
 
 const uploadMiddelewares = multer({
   storage: uploadConfig,
+  limits: { fileSize: 4048 }
 })
 
 module.exports = uploadMiddelewares

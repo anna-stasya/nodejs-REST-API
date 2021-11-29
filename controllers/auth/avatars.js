@@ -1,4 +1,4 @@
-const { Unauthorized } = require('http-errors')
+const { Unauthorized, BadRequest } = require('http-errors')
 const path = require('path')
 const fs = require('fs/promises')
 const Jimp = require('jimp')
@@ -8,10 +8,10 @@ const { User } = require('../../model/Schemas/user')
 const userDir = path.join(__dirname, '../../public/avatars')
 
 const avatars = async (req, res, next) => {
-//   if (!req.file) {
-//     return next(new BadRequest('Error upload file'))
-//   }
-  // const id = String(req.user._id)
+  if (!req.file) {
+    return next(new BadRequest('Error upload file'))
+  }
+
   const { _id } = req.user
   const { path: tempUpload, originalname } = req.file
 
