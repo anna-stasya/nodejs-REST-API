@@ -1,9 +1,11 @@
 const { Conflict } = require('http-errors')
+const { nanoid } = require('nanoid')
 const path = require('path')
 const fs = require('fs/promises')
 const gravatar = require('gravatar')
 
 const { User } = require('../../model/Schemas/user')
+const sendMail = require('../../utils/sendMail')
 
 const contactsDir = path.join(__dirname, '../../public/avatars')
 
@@ -16,10 +18,20 @@ const signup = async (req, res) => {
   if (user) {
     throw new Conflict(`Email ${email} in use`)
   }
-  const newUser = new User({ email, avatarURL })
+  const verificationToken = nanoid()
+  const newUser = new User({ email, avatarURL, verificationToken })
 
   newUser.setPassword(password)
+
   await newUser.save()
+
+  const mail = {
+    to: email,
+    from: 'sanatar.nastya@gmail.com',
+    subject: 'registration confirmed',
+    html: `<a href='http://localhost:3000/api/auth/verify/${verificationToken}'> Сlick to confirm email</a>`
+  }
+  await sendMail(mail)
 
   const avatarFolder = path.join(contactsDir, String(newUser._id))
 
