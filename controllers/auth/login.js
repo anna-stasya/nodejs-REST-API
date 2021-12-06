@@ -9,6 +9,10 @@ const login = async (req, res) => {
   const { email, password } = req.body
   const user = await User.findOne({ email })
 
+  if (!user.verify) {
+    throw new BadRequest('Sorry, you have not verified your email')
+  }
+
   if (!user || !user.comparePassword(password)) {
     throw new BadRequest('Email or password is wrong')
   }
