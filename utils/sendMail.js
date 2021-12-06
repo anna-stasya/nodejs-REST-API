@@ -7,7 +7,7 @@ sgMail.setApiKey(SENDGRID__API_KEY)
 
 const sendMail = async (data) => {
   const email = { ...data, from: 'sanatar.nastya@gmail.com' }
-  sgMail.send(email)
+  await sgMail.send(email)
   return true
 }
 
